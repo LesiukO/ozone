@@ -1,6 +1,6 @@
 'use strict';
 
-// 1. ckeckbox start 
+//  ckeckbox start 
 function toggleCheckbox() {
     const checkbox = document.querySelectorAll('#discount-checkbox');
 
@@ -14,10 +14,10 @@ function toggleCheckbox() {
         });
     });
 };
-// 1.---ckeckbox end   
+// ---ckeckbox end   
 
 
-// 2. корзина start 
+//  корзина start 
 function toggleCart() {
     const btnCart   = document.getElementById('cart'),
           modalCart = document.querySelector('.cart'),
@@ -32,10 +32,10 @@ function toggleCart() {
         document.body.style.overflow = '';
     });    
 };
-// 2.---корзина end   
+// ---корзина end   
 
 
-// 3. Вивод товаров start 
+//  Вивод товаров start 
 function addCart() {
     const cards       = document.querySelectorAll('.goods .card'),
           cartEmpty   = document.getElementById('cart-empty'),
@@ -79,13 +79,12 @@ function addCart() {
         };
     });
 };
-// 3.---Вивод товаров end
+// ---Вивод товаров end
 
 
-// 4. фильтр start 
+//  action start 
 function actionPage() {
     const cards            = document.querySelectorAll('.goods .card'),
-        //   goods            = document.querySelector('.goods'), 
           search           = document.querySelector('.search-wrapper_input'), 
           searchBtn        = document.querySelector('.search-btn'), 
           min              = document.getElementById('min'),
@@ -97,42 +96,52 @@ function actionPage() {
     min.addEventListener('change', filter);
     max.addEventListener('change', filter);
 
-    function filter() {
-        cards.forEach( (card) => {
-            const cardPrice = card.querySelector('.card-price');
-            const price = parseFloat(cardPrice.textContent);
-            const discount = card.querySelector('.card-sale');
-
-            if ((min.value && price < min.value) || (max.value && price > max.value)) {
-                card.parentNode.style.display = 'none';
-            } else if (discountCheckbox.checked && !discount) {
-                card.parentNode.style.display = 'none';
-            } else {
-                card.parentNode.style.display = '';
-            }
-
-        });
-    };
-
     searchBtn.addEventListener('click', () => {
         const searchText = new RegExp(search.value.trim(), 'i');
         cards.forEach( (card) => {
             const title = card.querySelector('.card-title');
             if (!searchText.test(title.textContent)) {
-                // card.parentNode.remove();
                 card.parentNode.style.display = 'none';
             } else {
-                // goods.appendChild(card.parentNode);
                 card.parentNode.style.display = '';
             }
         });
         search.value = '';
     });
 };
-// 4.---фильтр end   
+// ---action end   
+
+//  filter start 
+function filter() {
+    const cards      = document.querySelectorAll('.goods .card'),
+    min              = document.getElementById('min'),
+    max              = document.getElementById('max'),
+    discountCheckbox = document.getElementById('discount-checkbox'),
+    activeLi         = document.querySelector('.catalog-list li.active');
 
 
-// 5. Получение данных с сервера start 
+    cards.forEach( (card) => {
+        const cardPrice = card.querySelector('.card-price');
+        const price = parseFloat(cardPrice.textContent);
+        const discount = card.querySelector('.card-sale');
+
+        card.parentNode.style.display = '';
+
+        if ((min.value && price < min.value) || (max.value && price > max.value)) {
+            card.parentNode.style.display = 'none';
+        } else if (discountCheckbox.checked && !discount) {
+            card.parentNode.style.display = 'none';
+        } else if (activeLi) {
+            if (card.dataset.category !== activeLi.textContent) {
+                card.parentNode.style.display = 'none';
+            }
+        }
+    });
+};
+//  ---filter end   
+
+
+//  Получение данных с сервера start 
 function getData() {
     const goodsWrapper = document.querySelector('.goods');
 
@@ -152,10 +161,10 @@ function getData() {
             goodsWrapper.innerHTML = '<div style="color: red; font-size: 30px;">Упс что-то пошло не так!</div>';
         });
 };
-// 5.---Получение данных с сервера end   
+// ---Получение данных с сервера end   
 
 
-// 6. Вивод карточек товара start 
+//  Вивод карточек товара start 
 function renderCards(data) {
     const goodsWrapper = document.querySelector('.goods');
 
@@ -179,9 +188,9 @@ function renderCards(data) {
         goodsWrapper.appendChild(card);
     });
 };
-// 6. ---Вивод карточек товара end   
+//  ---Вивод карточек товара end   
 
-// 7. рендер каталога start 
+//  рендер каталога start 
 function renderCatalog() {
     const cards          = document.querySelectorAll('.goods .card');
     const catalogWrapper = document.querySelector('.catalog');
@@ -199,6 +208,8 @@ function renderCatalog() {
         catalogList.appendChild(li);
     });
 
+    const allLi = catalogList.querySelectorAll('li');
+
     catalogBtn.addEventListener('click', (event) => {
         if (catalogWrapper.style.display) {
             catalogWrapper.style.display = '';
@@ -207,28 +218,36 @@ function renderCatalog() {
         }
 
         if (event.target.tagName === 'LI') {
-            cards.forEach( (card) => {
-                if (card.dataset.category === event.target.textContent) {
-                    card.parentNode.style.display = '';
+            // cards.forEach( (card) => {
+            //     if (card.dataset.category === event.target.textContent) {
+            //         card.parentNode.style.display = '';
+            //     } else {
+            //         card.parentNode.style.display = 'none';
+            //     }
+            // });
+            allLi.forEach( (elem) => {
+                if (event.target === elem) {
+                    elem.classList.add('active');
                 } else {
-                    card.parentNode.style.display = 'none';
+                    elem.classList.remove('active');
                 }
             });
+            filter();
         }
     });
 
 };
-// 7. ---рендер каталога end   
+//  ---рендер каталога end   
 
 
 
 getData().then( (data) => {
     renderCards(data);
+    renderCatalog();
     toggleCheckbox();
     toggleCart();
     addCart();
     actionPage();
-    renderCatalog();
 });
 
 
@@ -237,9 +256,9 @@ getData().then( (data) => {
 
 
 
-// // 4. Вивод start 
+// //  Вивод start 
 // function add() {
     
 // };
-// // 3. ---Вивод end   
+// //  ---Вивод end   
 // add();
